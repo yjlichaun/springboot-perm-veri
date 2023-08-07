@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.muyi.example.mapper.UserMapper">
+    <resultMap id="UserMap" type="com.muyi.example.entity.User">
+        <id column="id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_status" property="deleteStatus"/>
+    </resultMap>
+
+    <resultMap id="UserVoMap" type="com.muyi.example.vo.UserVo">
+        <id column="id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleteStatus" property="deleteStatus"/>
+        <result column="delete_status" property="deleteStatus"/>
+        <collection property="roles" ofType="com.muyi.example.entity.Role">
+            <id column="roleId" property="id"/>
+            <result column="roleName" property="roleName"/>
+        </collection>
+    </resultMap>
+
+
+    <insert id="batchAndUserRole">
+        insert into sys_user_role
+        (user_id,role_id) values
+        <foreach collection="roles" item="i" separator=",">
+            (#{userId},#{i.id})
+        </foreach>
+    </insert>
+
+    <select id="getUserInfo" resultMap="UserVoMap">
+        select u.* ,
+               ur.role_id         roleId,
+               r.role_name        roleName
+        from sys_user u
+            left join sys_user_role ur on u.id = ur.user_id
+            left join sys_role r on ur.role_id = r.id
+        where u.id = #{userId}
+    </select>
+
+    <select id="listRoles" resultMap="com.muyi.example.vo.RoleVo"></select>
+</mapper>
