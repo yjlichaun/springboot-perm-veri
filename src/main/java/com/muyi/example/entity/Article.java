@@ -18,7 +18,7 @@ public class Article extends BaseEntity {
     private Integer id;
     
     /**
-     * 用户
+     * 文章
      */
     private String content;
 }

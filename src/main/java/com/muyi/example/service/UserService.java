@@ -3,6 +3,7 @@ package com.muyi.example.service;
 import com.muyi.example.dto.UserInfo;
 import com.muyi.example.entity.User;
 import com.muyi.example.util.R;
+import com.muyi.example.vo.RoleVo;
 import com.muyi.example.vo.UserVo;
 
 /**
@@ -52,4 +53,31 @@ public interface UserService {
      * @return R
      */
     R listRoles();
+    
+    /**
+     * 查询所有权限，分配权限时使用
+     * @return
+     */
+    R listAllPermission();
+    
+    /**
+     * 添加角色
+     * @param roleVo 角色
+     * @return R
+     */
+    R addRole(RoleVo roleVo);
+    
+    /**
+     * 修改角色
+     * @param roleVo 角色
+     * @return R
+     */
+    R updateRole(RoleVo roleVo);
+    
+    /**
+     * 删除角色
+     * @param roleId 角色id
+     * @return R
+     */
+    R deleteRole(int roleId);
 }

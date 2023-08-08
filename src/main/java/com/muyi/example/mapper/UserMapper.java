@@ -1,9 +1,11 @@
 package com.muyi.example.mapper;
 
+import com.muyi.example.dto.Permission;
 import com.muyi.example.dto.UserInfo;
 import com.muyi.example.entity.Role;
 import com.muyi.example.entity.User;
 import com.muyi.example.util.R;
+import com.muyi.example.vo.RoleVo;
 import com.muyi.example.vo.UserVo;
 import org.apache.ibatis.annotations.*;
 import org.mybatis.spring.annotation.MapperScan;
@@ -82,7 +84,78 @@ public interface UserMapper {
      * 获取角色列表
      * @return 角色列表
      */
-    
-    //TODO:2023-08-07 22:11:45
     List<Role> listRoles();
+    
+    /**
+     * 获取全部权限
+     * @return 获取权限
+     */
+    List<Permission> listAllPermissions();
+    
+    /**
+     * 添加角色
+     * @param role 角色
+     * @return 影响行数
+     */
+    @Insert("insert into sys_role (role_name, create_time, update_time, delete_status) " +
+            "values (#{roleName},#{createTime},#{updateTime},#{deleteStatus})")
+    int addRole(Role role);
+    
+    /**
+     * 通过角色名称获取角色
+     * @param roleName 角色名称
+     * @return 角色信息
+     */
+    @Select("select * from sys_role where role_name = #{roleName}")
+    Role getRoleByRoleName(@Param("roleName") String roleName);
+    
+    /**
+     * 绑定角色权限
+     * @param id 角色id
+     * @param permissions 权限
+     * @param dateNow 绑定日期
+     * @return 影响行数
+     */
+    int batchAndRolePerm(@Param("id") Integer id,
+                         @Param("permissions") List<Permission> permissions,
+                         @Param("dateNow") String dateNow);
+    
+    /**
+     * 更新角色信息
+     * @param roleName 角色名称
+     * @param roleId 角色id
+     * @param dateNow 更新日期
+     * @return 影响行数
+     */
+    @Update("update sys_role set " +
+            "role_name = #{roleName}," +
+            "update_time = #{dateNow} " +
+            "where id = #{roleId}")
+    int updateRole(@Param("roleName") String roleName,
+                   @Param("roleId") int roleId,
+                   @Param("dateNow") String dateNow);
+    
+    /**
+     * 移除角色权限关系
+     * @param roleId 角色id
+     * @return 影响行数
+     */
+    @Update("update sys_role_permission set delete_status = '2' where role_id = #{roleId}")
+    int removeRolePerm(@Param("roleId") Integer roleId);
+    
+    /**
+     * 通过角色id获取角色信息
+     * @param roleId 角色id
+     * @return Role
+     */
+    @Select("select * from sys_role where id = #{roleId}")
+    Role getRoleByRoleId(@Param("roleId") int roleId);
+    
+    /**
+     * 删除角色
+     * @param roleId 角色id
+     * @return 影响行数
+     */
+    @Update("update sys_role set delete_status = '2' where id = #{roleId}")
+    int deleteRole(int roleId);
 }

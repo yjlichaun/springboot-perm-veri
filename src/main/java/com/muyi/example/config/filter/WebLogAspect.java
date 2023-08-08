@@ -1,5 +1,6 @@
 package com.muyi.example.config.filter;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.muyi.example.util.Log;
@@ -62,21 +63,13 @@ public class WebLogAspect {
         Map<String, String> map = MDC.getCopyOfContextMap();
         if (map != null) {
             Log reslog = new Log();
-//            jsonObject.put("uri", request.getRequestURI());
-//            jsonObject.put("took", System.currentTimeMillis() - Long.parseLong(map.getOrDefault("startTime", String.valueOf(System.currentTimeMillis()))));
-//            jsonObject.put("userId", map.getOrDefault("userId", ""));
-//            jsonObject.put("req", JSON.parseObject(map.getOrDefault("req", "")));
             reslog.setUrl(request.getRequestURI());
             reslog.setTook(System.currentTimeMillis() - Long.parseLong(map.getOrDefault("startTime", String.valueOf(System.currentTimeMillis()))));
-            reslog.setUserId(map.getOrDefault("userId", ""));
+            reslog.setUserId(StpUtil.getLoginId().toString());
             reslog.setReq(JSON.parseObject(map.getOrDefault("req","")));
-//            if (result != null) {
-//                jsonObject.put("res", JSON.parseObject(result.toString()));
-//            }
             if ( result != null ) {
                 reslog.setRes(result.toString());
             }
-//            log.info(jsonObject.toJSONString());
             log.info(reslog.toString());
         }
         

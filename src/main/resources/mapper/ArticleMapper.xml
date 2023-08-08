@@ -9,4 +9,11 @@
         <result column="update_time" property="updateTime"/>
         <result column="delete_status" property="deleteStatus"/>
     </resultMap>
+
+    <update id="updateArticle">
+        update article
+        set content = #{article.content},
+            update_time = #{updateTime}
+        where id = #{article.id}
+    </update>
 </mapper>

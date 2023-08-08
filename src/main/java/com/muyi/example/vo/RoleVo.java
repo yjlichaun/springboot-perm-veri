@@ -1,8 +1,12 @@
 package com.muyi.example.vo;
 
+import com.muyi.example.dto.Menu;
+import com.muyi.example.entity.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.List;
 
 /**
  * @author 历川
@@ -18,15 +22,8 @@ public class RoleVo {
     
     private String roleName;
     
-    private Integer userId;
+    private List<User> users;
     
-    private String nickname;
+    private List<Menu> menus;
     
-    private Integer permissionId;
-    
-    private String menuCode;
-    
-    private String menuName;
-    
-    private String permissionName;
 }

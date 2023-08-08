@@ -3,10 +3,12 @@ package com.muyi.example.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaMode;
 import com.muyi.example.dto.UserInfo;
+import com.muyi.example.entity.Role;
 import com.muyi.example.entity.User;
 import com.muyi.example.service.UserService;
 import com.muyi.example.util.CommonUtil;
 import com.muyi.example.util.R;
+import com.muyi.example.vo.RoleVo;
 import com.muyi.example.vo.UserVo;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +66,7 @@ public class UserController {
      * @return R
      */
     @SaCheckPermission("user:update")
-    @PostMapping("/updateUser")
+    @PutMapping("/updateUser")
     public R  updateUser(@RequestBody UserVo userVo){
         return userService.updateUser(userVo);
     }
@@ -87,5 +89,49 @@ public class UserController {
     @GetMapping("/listRoles")
     public R listRoles() {
         return userService.listRoles();
+    }
+    
+    
+    /**
+     * 查询所有权限，分配权限时调用
+     * @return R
+     */
+    @SaCheckPermission("role:list")
+    @GetMapping("/listAllPermission")
+    public R listAllPermissions() {
+        return userService.listAllPermission();
+    }
+    
+    /**
+     * 新增角色
+     * @param roleVo 角色
+     * @return R
+     */
+    @SaCheckPermission("role:add")
+    @PostMapping("addRole")
+    public R addRole(@RequestBody RoleVo roleVo) {
+        return userService.addRole(roleVo);
+    }
+    
+    /**
+     * 修改角色
+     * @param roleVo 角色
+     * @return R
+     */
+    @SaCheckPermission("role:update")
+    @PutMapping("/updateRole")
+    public R updateRole(@RequestBody RoleVo roleVo) {
+        return userService.updateRole(roleVo);
+    }
+    
+    /**
+     * 删除角色
+     * @param roleId 角色Id
+     * @return R
+     */
+    @SaCheckPermission("role:delete")
+    @DeleteMapping("/deleteRole/{roleId}")
+    public R deleteRole(@PathVariable int roleId) {
+        return userService.deleteRole(roleId);
     }
 }

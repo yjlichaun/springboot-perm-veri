@@ -39,7 +39,7 @@ public class LoginServiceImpl implements LoginService {
             return R.failed(null,ErrorEnum.E_10010.getErrorCode(),ErrorEnum.E_10010.getErrorMsg());
         }
         StpUtil.login(user.getUserId());
-        return R.ok("登录成功");
+        return R.ok(user,"登录成功");
     }
     
     @Override

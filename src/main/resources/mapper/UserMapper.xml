@@ -26,6 +26,30 @@
         </collection>
     </resultMap>
 
+    <resultMap id="roleMap" type="com.muyi.example.vo.RoleVo">
+        <id column="roleId" property="roleId"/>
+        <result column="roleName" property="roleName"/>
+        <collection property="users" ofType="com.muyi.example.entity.User">
+            <id column="userId" property="userId"/>
+            <result column="nickname" property="nickname"/>
+        </collection>
+        <collection property="menus" ofType="com.muyi.example.dto.Menu">
+            <id column="menuCode" property="menuCode"/>
+            <result column="menuName" property="menuName"/>
+            <collection property="permissions" ofType="com.muyi.example.dto.Permission">
+                <id column="permissionId" property="permissionId"/>
+                <result column="permissionName" property="permissionName"/>
+            </collection>
+        </collection>
+    </resultMap>
+    <resultMap id="permissionMap" type="com.muyi.example.vo.PermissionVo">
+        <id column="menuName" property="menuName"/>
+        <collection property="permissions" ofType="com.muyi.example.dto.Permission">
+            <id column="id" property="permissionId"/>
+            <result column="permissionName" property="permissionName"/>
+            <result column="requiredPerm" property="requiredPerm" javaType="Integer"/>
+        </collection>
+    </resultMap>
 
     <insert id="batchAndUserRole">
         insert into sys_user_role
@@ -45,5 +69,38 @@
         where u.id = #{userId}
     </select>
 
-    <select id="listRoles" resultMap="com.muyi.example.vo.RoleVo"></select>
+    <select id="listRoles" resultMap="roleMap">
+        select r.id                 roleId,
+               r.role_name          roleName,
+               u.id                 userId,
+               u.nickname,
+               p.id                 permissionId,
+               p.menu_code          menuCode,
+               p.menu_name          menuName,
+               p.permission_name    permissionName
+        from sys_role r
+            left join sys_user_role ur on r.id = ur.role_id
+            left join sys_user u on u.id = ur.user_id and u.delete_status = '1'
+            left join sys_role_permission rp on r.id = rp.role_id and rp.delete_status = '1'
+            left join sys_permission p on rp.permission_id = p.id
+        where r.delete_status = '1'
+        order by r.id,p.id
+    </select>
+
+    <select id="listAllPermissions" resultMap="permissionMap">
+        select p.id,
+               p.menu_name           menuName,
+               p.permission_name     permissionName,
+               p.required_permission requiredPerm
+        from sys_permission p;
+    </select>
+    <insert id="batchAndRolePerm">
+        insert into sys_role_permission
+            (role_id,permission_id,create_time,update_time,delete_status)
+        values
+        <foreach collection="permissions" item="it" separator=",">
+            (#{id},#{it.permissionId},#{dateNow},#{dateNow},'1')
+        </foreach>
+
+    </insert>
 </mapper>

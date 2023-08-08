@@ -1,5 +1,7 @@
 package com.muyi.example.service.impl;
 
+import com.muyi.example.dto.Menu;
+import com.muyi.example.dto.Permission;
 import com.muyi.example.dto.UserInfo;
 import com.muyi.example.entity.Role;
 import com.muyi.example.entity.User;
@@ -10,6 +12,7 @@ import com.muyi.example.util.CommonUtil;
 import com.muyi.example.util.DateUtil;
 import com.muyi.example.util.R;
 import com.muyi.example.util.constants.ErrorEnum;
+import com.muyi.example.vo.RoleVo;
 import com.muyi.example.vo.UserVo;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
@@ -92,7 +95,7 @@ public class UserServiceImpl implements UserService {
         if (userVo.getNickname() == null || "".equals(userVo.getNickname())) {
             return R.failed("用户昵称不能为空");
         }
-        User user = new UserVo();
+        User user = new User();
         BeanUtils.copyProperties(userVo, user);
         user.setUpdateTime(DateUtil.getDateNow());
         int updateCnt = userMapper.updateUser(user);
@@ -106,7 +109,7 @@ public class UserServiceImpl implements UserService {
             R.failed("移除用户角色失败");
         }
         
-        if (userVo.getRoles() != null){
+        if (userVo.getRoles() != null) {
             userMapper.batchAndUserRole(userVo);
         }
         return R.ok("用户更新完成");
@@ -127,7 +130,7 @@ public class UserServiceImpl implements UserService {
         if (roles == null) {
             return R.ok("目前暂无角色");
         }
-        return R.ok(roles,"查询成功！！！");
+        return R.ok(roles, "查询成功！！！");
     }
     
     @Override
@@ -137,5 +140,107 @@ public class UserServiceImpl implements UserService {
             return R.failed("未获取到数据");
         }
         return R.ok(list);
+    }
+    
+    @Override
+    public R listAllPermission() {
+        List<Permission> permissions = userMapper.listAllPermissions();
+        if (permissions == null) {
+            return R.failed("未查询到权限列表");
+        }
+        return R.ok(permissions);
+    }
+    
+    @Override
+    @Transactional
+    public R addRole(RoleVo roleVo) {
+        String roleName = roleVo.getRoleName();
+        List<Permission> permissions = getPermission(roleVo);
+        if (roleName == null || ("").equals(roleName)) {
+            return R.failed("角色名称不能为空");
+        }
+        
+        Role tmpRole = userMapper.getRoleByRoleName(roleName);
+        if (tmpRole != null) {
+            return R.failed("角色已经存在,不能添加");
+        }
+        Role role = new Role();
+        role.setRoleName(roleName);
+        role.setCreateTime(DateUtil.getDateNow());
+        role.setUpdateTime(DateUtil.getDateNow());
+        role.setDeleteStatus("1");
+        int addCnt = userMapper.addRole(role);
+        if (addCnt == 0) {
+            return R.failed("添加失败");
+        }
+        role = userMapper.getRoleByRoleName(roleName);
+        if (permissions.size() > 0) {
+            int batchCnt = userMapper.batchAndRolePerm(role.getId(),permissions,DateUtil.getDateNow());
+            if (batchCnt == 0) {
+                return R.failed("绑定角色和权限时错误");
+            }
+        }
+        return R.ok(role,"添加角色成功");
+    }
+    
+    @Override
+    @Transactional
+    public R updateRole(RoleVo roleVo) {
+        String roleName = roleVo.getRoleName();
+        List<Permission> permissions = getPermission(roleVo);
+        if (roleName == null || ("").equals(roleName)) {
+            return R.failed("角色名不能为空");
+        }
+        Role roleTmp = userMapper.getRoleByRoleName(roleName);
+        if (roleTmp != null) {
+            return R.failed("该角色已经存在，无法修改");
+        }
+        int updateCnt = userMapper.updateRole(roleVo.getRoleName(),roleVo.getRoleId(),DateUtil.getDateNow());
+        if (updateCnt == 0) {
+            return R.failed("更新失败!!!");
+        }
+        int removeCnt = userMapper.removeRolePerm(roleVo.getRoleId());
+        if (removeCnt == 0) {
+            return R.failed("移除角色权限关系失败");
+        }
+        if (permissions.size() > 0) {
+            int batchCnt = userMapper.batchAndRolePerm(roleVo.getRoleId(),permissions,DateUtil.getDateNow());
+            if (batchCnt == 0) {
+                return R.failed("绑定角色和权限时错误");
+            }
+        }
+        return R.ok("修改角色成功");
+    }
+    
+    @Override
+    @Transactional
+    public R deleteRole(int roleId) {
+        Role role = userMapper.getRoleByRoleId(roleId);
+        if  (role == null) {
+            return R.failed("角色不存在,无法删除");
+        }
+        int deleteCnt = userMapper.deleteRole(roleId);
+        if (deleteCnt == 0) {
+            return R.failed("删除失败");
+        }
+        int removeCnt = userMapper.removeRolePerm(roleId);
+        return R.ok("删除成功");
+    }
+    
+    public List<Permission> getPermission(RoleVo roleVo) {
+        List<Menu> menus = roleVo.getMenus();
+        List<Permission> permissions = new ArrayList<>();
+        if (menus != null) {
+            for (Menu menu : menus) {
+                if (menu == null) {
+                    continue;
+                }
+                List<Permission> tmp = menu.getPermissions();
+                if (tmp != null) {
+                    permissions.addAll(permissions.size(),tmp);
+                }
+            }
+        }
+        return permissions;
     }
 }
